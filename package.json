@@ -1,0 +1,23 @@
+{
+  "name": "ai-native-startup-validation-cockpit",
+  "version": "0.1.0",
+  "description": "LLM-backed idea-to-MVP validation cockpit for founders, with SaaS scope prompts and fail-closed agent review gates.",
+  "private": false,
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "dev:api": "node server.mjs",
+    "dev:full": "sh -c 'node server.mjs & vite --host 127.0.0.1 --port 5173'",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^5.0.0",
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "vite": "^7.0.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.60.0"
+  }
+}

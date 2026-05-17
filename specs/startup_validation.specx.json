@@ -1,0 +1,72 @@
+{
+  "contract_id": "startup_validation_idea_to_scale_v1",
+  "version": "1.0.0",
+  "objective": "Guide founders from idea generation to MVP, launch, and scale while filtering weak ideas, preventing AI-amplified bad prototypes, and selecting valuable prototypes using evidence-bound gates.",
+  "domain": "ai_native_startup_validation",
+  "task_type": "llm_driven_agent_workflow_specification",
+  "required_agents": [
+    "Idea Scout Agent",
+    "Skeptic Agent",
+    "Discovery Analyst Agent",
+    "MVP Architect Agent",
+    "Launch Signal Agent",
+    "Scale Systems Agent"
+  ],
+  "required_tools": [
+    "interview recorder",
+    "evidence table",
+    "metric tracker",
+    "validator scripts",
+    "human approval checkpoint"
+  ],
+  "required_evidence": [
+    "target user interview notes",
+    "current workaround evidence",
+    "prototype usage evidence",
+    "activation and retention metrics",
+    "payment, booking, referral, or repeated-use signals",
+    "quality and support cost records"
+  ],
+  "gates": [
+    {
+      "name": "idea_gate",
+      "pass_condition": "At least 10 target-user evidence items, with at least 6 showing pain or current workaround and at least 3 showing budget, schedule, reuse, or migration intent.",
+      "fail_state": "reject_or_revise_idea"
+    },
+    {
+      "name": "mvp_gate",
+      "pass_condition": "At least 5 target users test the MVP, at least 2 complete the core behavior and show reuse, booking, or payment intent, with real operation evidence.",
+      "fail_state": "revise_mvp_or_reject"
+    },
+    {
+      "name": "launch_gate",
+      "pass_condition": "At least two non-vanity signals meet predeclared thresholds across activation, D7 retention, repeat usage, payment, booking, or referral.",
+      "fail_state": "iterate_launch_or_pause"
+    },
+    {
+      "name": "scale_gate",
+      "pass_condition": "Unit economics are stable or improving, delivery quality is measurable, support cost is controlled, and agentic workflows include failure states and human approvals.",
+      "fail_state": "constrain_growth_or_return_to_launch"
+    }
+  ],
+  "expected_artifacts": [
+    "specs/role_spec.md",
+    "specs/execution_spec.md",
+    "specs/output_spec.md",
+    "README.md"
+  ],
+  "failure_semantics": {
+    "missing_evidence": "blocked",
+    "threshold_not_met": "rejected_or_revise",
+    "unsupported_agent_capability": "unsupported",
+    "script_only_logic_labeled_agent": "invalid",
+    "fake_success_or_silent_fallback": "invalid"
+  },
+  "execution_constraints": [
+    "Do not hardcode success.",
+    "Do not fabricate user evidence.",
+    "Do not use fallback outputs to hide failure.",
+    "Do not call scripts agents unless LLM-backed decision authority exists.",
+    "Human approval is required before MVP build, public launch, and scale expansion."
+  ]
+}
