@@ -4,6 +4,9 @@
   "description": "LLM-backed idea-to-MVP validation cockpit for founders, with SaaS scope prompts and fail-closed agent review gates.",
   "private": false,
   "scripts": {
+    "frontend": "vite --host 127.0.0.1 --port 5173",
+    "backend": "node server.mjs",
+    "start": "sh -c 'node server.mjs & vite --host 127.0.0.1 --port 5173'",
     "dev": "vite --host 127.0.0.1",
     "dev:api": "node server.mjs",
     "dev:full": "sh -c 'node server.mjs & vite --host 127.0.0.1 --port 5173'",

@@ -33,14 +33,30 @@ AGENT_API_PORT=8787
 启动后端和前端：
 
 ```bash
-npm run dev:api
-npm run dev -- --port 5173
+npm run backend
+npm run frontend
 ```
 
 打开：
 
 ```text
 http://127.0.0.1:5173/
+```
+
+CLI：
+
+```bash
+# 前端 CLI：启动 Vite UI
+npm run frontend
+
+# 后端 CLI：启动 LLM agent API
+npm run backend
+
+# 全栈 CLI：同时启动后端和前端
+npm start
+
+# 构建前端
+npm run build
 ```
 
 ## 核心原则
