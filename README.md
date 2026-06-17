@@ -21,12 +21,12 @@ npm install
 cp .env.example .env.local
 ```
 
-填入 DeepSeek 配置：
+填入 LLM 配置：
 
 ```bash
-DEEPSEEK_API_KEY=your_key_here
-DEEPSEEK_BASE_URL=https://api.deepseek.com
-DEEPSEEK_MODEL=deepseek-v4-flash
+AGENT_LLM_API_KEY=your_key_here
+AGENT_LLM_BASE_URL=
+AGENT_LLM_MODEL=
 AGENT_API_PORT=8787
 ```
 

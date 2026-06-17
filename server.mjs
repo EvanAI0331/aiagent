@@ -6,62 +6,62 @@ const root = process.cwd();
 loadEnv(path.join(root, '.env.local'));
 
 const port = Number(process.env.AGENT_API_PORT || 8787);
-const deepseekApiKey = process.env.DEEPSEEK_API_KEY;
-const deepseekBaseUrl = (process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com').replace(/\/$/, '');
-const deepseekModel = process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash';
+const llmApiKey = process.env.AGENT_LLM_API_KEY;
+const llmBaseUrl = (process.env.AGENT_LLM_BASE_URL || '').replace(/\/$/, '');
+const llmModel = process.env.AGENT_LLM_MODEL || '';
 
 const server = http.createServer(async (req, res) => {
   try {
     if (req.method === 'GET' && req.url === '/api/health') {
       sendJson(res, 200, {
-        ok: Boolean(deepseekApiKey),
-        provider: 'deepseek',
-        model: deepseekModel
+        ok: Boolean(llmApiKey && llmBaseUrl && llmModel),
+        provider: 'configured',
+        configured: Boolean(llmApiKey && llmBaseUrl && llmModel)
       });
       return;
     }
 
     if (req.method === 'POST' && req.url === '/api/agent-question') {
-      if (!deepseekApiKey) {
+      if (!isLlmConfigured()) {
         sendJson(res, 503, {
-          error: 'missing_deepseek_api_key',
-          message: 'DeepSeek runtime is not configured.'
+          error: 'missing_llm_runtime_config',
+          message: 'LLM runtime is not configured.'
         });
         return;
       }
 
       const body = await readJson(req);
-      const payload = await callDeepSeek(body);
+      const payload = await callLLM(body);
       sendJson(res, 200, payload);
       return;
     }
 
     if (req.method === 'POST' && req.url === '/api/saas-scope-review') {
-      if (!deepseekApiKey) {
+      if (!isLlmConfigured()) {
         sendJson(res, 503, {
-          error: 'missing_deepseek_api_key',
-          message: 'DeepSeek runtime is not configured.'
+          error: 'missing_llm_runtime_config',
+          message: 'LLM runtime is not configured.'
         });
         return;
       }
 
       const body = await readJson(req);
-      const payload = await callDeepSeekScopeReview(body);
+      const payload = await callLLMScopeReview(body);
       sendJson(res, 200, payload);
       return;
     }
 
     if (req.method === 'POST' && req.url === '/api/idea-agent-panel') {
-      if (!deepseekApiKey) {
+      if (!isLlmConfigured()) {
         sendJson(res, 503, {
-          error: 'missing_deepseek_api_key',
-          message: 'DeepSeek runtime is not configured.'
+          error: 'missing_llm_runtime_config',
+          message: 'LLM runtime is not configured.'
         });
         return;
       }
 
       const body = await readJson(req);
-      const payload = await callDeepSeekIdeaPanel(body);
+      const payload = await callLLMIdeaPanel(body);
       sendJson(res, 200, payload);
       return;
     }
@@ -78,6 +78,10 @@ const server = http.createServer(async (req, res) => {
 server.listen(port, '127.0.0.1', () => {
   console.log(`Agent API listening on http://127.0.0.1:${port}`);
 });
+
+function isLlmConfigured() {
+  return Boolean(llmApiKey && llmBaseUrl && llmModel);
+}
 
 function loadEnv(filePath) {
   if (!fs.existsSync(filePath)) return;
@@ -114,15 +118,15 @@ function readJson(req) {
   });
 }
 
-async function callDeepSeekIdeaPanel(context) {
-  const response = await fetch(`${deepseekBaseUrl}/chat/completions`, {
+async function callLLMIdeaPanel(context) {
+  const response = await fetch(`${llmBaseUrl}/chat/completions`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${deepseekApiKey}`,
+      Authorization: `Bearer ${llmApiKey}`,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: deepseekModel,
+      model: llmModel,
       temperature: 0.2,
       response_format: { type: 'json_object' },
       messages: [
@@ -180,9 +184,9 @@ async function callDeepSeekIdeaPanel(context) {
   const text = await response.text();
   if (!response.ok) {
     throw withStatus(
-      new Error(`DeepSeek request failed with HTTP ${response.status}.`),
+      new Error(`LLM request failed with HTTP ${response.status}.`),
       502,
-      'deepseek_http_error'
+      'llm_http_error'
     );
   }
 
@@ -223,11 +227,11 @@ function parseProviderJson(text, label) {
   try {
     data = JSON.parse(text);
   } catch {
-    throw withStatus(new Error('DeepSeek returned invalid JSON envelope.'), 502, 'invalid_provider_json');
+    throw withStatus(new Error('LLM returned invalid JSON envelope.'), 502, 'invalid_provider_json');
   }
   const content = data?.choices?.[0]?.message?.content;
   if (!content) {
-    throw withStatus(new Error('DeepSeek response did not contain message content.'), 502, 'missing_provider_content');
+    throw withStatus(new Error('LLM response did not contain message content.'), 502, 'missing_provider_content');
   }
   try {
     return JSON.parse(content);
@@ -271,15 +275,15 @@ function nonEmptyArray(value) {
   return Array.isArray(value) && value.length > 0;
 }
 
-async function callDeepSeekScopeReview(context) {
-  const response = await fetch(`${deepseekBaseUrl}/chat/completions`, {
+async function callLLMScopeReview(context) {
+  const response = await fetch(`${llmBaseUrl}/chat/completions`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${deepseekApiKey}`,
+      Authorization: `Bearer ${llmApiKey}`,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: deepseekModel,
+      model: llmModel,
       temperature: 0.2,
       response_format: { type: 'json_object' },
       messages: [
@@ -318,9 +322,9 @@ async function callDeepSeekScopeReview(context) {
   const text = await response.text();
   if (!response.ok) {
     throw withStatus(
-      new Error(`DeepSeek request failed with HTTP ${response.status}.`),
+      new Error(`LLM request failed with HTTP ${response.status}.`),
       502,
-      'deepseek_http_error'
+      'llm_http_error'
     );
   }
 
@@ -328,12 +332,12 @@ async function callDeepSeekScopeReview(context) {
   try {
     data = JSON.parse(text);
   } catch {
-    throw withStatus(new Error('DeepSeek returned invalid JSON envelope.'), 502, 'invalid_provider_json');
+    throw withStatus(new Error('LLM returned invalid JSON envelope.'), 502, 'invalid_provider_json');
   }
 
   const content = data?.choices?.[0]?.message?.content;
   if (!content) {
-    throw withStatus(new Error('DeepSeek response did not contain message content.'), 502, 'missing_provider_content');
+    throw withStatus(new Error('LLM response did not contain message content.'), 502, 'missing_provider_content');
   }
 
   let parsed;
@@ -368,15 +372,15 @@ async function callDeepSeekScopeReview(context) {
   };
 }
 
-async function callDeepSeek(context) {
-  const response = await fetch(`${deepseekBaseUrl}/chat/completions`, {
+async function callLLM(context) {
+  const response = await fetch(`${llmBaseUrl}/chat/completions`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${deepseekApiKey}`,
+      Authorization: `Bearer ${llmApiKey}`,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: deepseekModel,
+      model: llmModel,
       temperature: 0.2,
       response_format: { type: 'json_object' },
       messages: [
@@ -413,9 +417,9 @@ async function callDeepSeek(context) {
   const text = await response.text();
   if (!response.ok) {
     throw withStatus(
-      new Error(`DeepSeek request failed with HTTP ${response.status}.`),
+      new Error(`LLM request failed with HTTP ${response.status}.`),
       502,
-      'deepseek_http_error'
+      'llm_http_error'
     );
   }
 
@@ -423,12 +427,12 @@ async function callDeepSeek(context) {
   try {
     data = JSON.parse(text);
   } catch {
-    throw withStatus(new Error('DeepSeek returned invalid JSON envelope.'), 502, 'invalid_provider_json');
+    throw withStatus(new Error('LLM returned invalid JSON envelope.'), 502, 'invalid_provider_json');
   }
 
   const content = data?.choices?.[0]?.message?.content;
   if (!content) {
-    throw withStatus(new Error('DeepSeek response did not contain message content.'), 502, 'missing_provider_content');
+    throw withStatus(new Error('LLM response did not contain message content.'), 502, 'missing_provider_content');
   }
 
   let parsed;

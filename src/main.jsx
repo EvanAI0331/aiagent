@@ -218,7 +218,7 @@ function App() {
   const [evidenceDraft, setEvidenceDraft] = useState({ type: '访谈', title: '', source: '' });
   const [completed, setCompleted] = useState(['目标用户清晰']);
   const [runtimeNotice, setRuntimeNotice] = useState(
-    'DeepSeek runtime ready: agent 补充提问将由 LLM 生成；失败时保持 blocked。'
+    'LLM runtime ready: agent 补充提问将由 LLM 生成；失败时保持 blocked。'
   );
   const [isAgentLoading, setIsAgentLoading] = useState(false);
 
@@ -311,7 +311,7 @@ function App() {
 
   async function requestAgentQuestion(mode = 'followup') {
     setIsAgentLoading(true);
-    setRuntimeNotice('DeepSeek agent 正在生成补充追问...');
+    setRuntimeNotice('LLM agent 正在生成补充追问...');
     try {
       const response = await fetch('/api/agent-question', {
         method: 'POST',
@@ -351,7 +351,7 @@ function App() {
 
   async function runIdeaAgentPanel() {
     setIsIdeaPanelLoading(true);
-    setIdeaPanelNotice('DeepSeek 正在运行 Idea 阶段 3-agent 审查...');
+    setIdeaPanelNotice('LLM 正在运行 Idea 阶段 3-agent 审查...');
     try {
       const response = await fetch('/api/idea-agent-panel', {
         method: 'POST',
@@ -771,7 +771,7 @@ function ScopeReviewModal({ open, scope, review, loading, onClose, onUseScope })
           <div>
             <span className="modal-agent">Skeptic Agent</span>
             <h2>{scope.name}</h2>
-            <p>初始质疑、证据门槛和 AI 原型风险由 DeepSeek LLM 生成。</p>
+            <p>初始质疑、证据门槛和 AI 原型风险由 LLM LLM 生成。</p>
           </div>
           <button className="modal-close" onClick={onClose}>Close</button>
         </div>
@@ -779,7 +779,7 @@ function ScopeReviewModal({ open, scope, review, loading, onClose, onUseScope })
         {loading ? (
           <div className="modal-loading">
             <Sparkles size={22} />
-            <strong>DeepSeek agent 正在审查这个 SaaS 方向...</strong>
+            <strong>LLM agent 正在审查这个 SaaS 方向...</strong>
             <span>缺字段或输出无效会 fail-closed，不会显示本地兜底内容。</span>
           </div>
         ) : (
@@ -1110,7 +1110,7 @@ function Inspector({
           <span>{runtimeBlocked ? '!' : '✓'}</span>
         </div>
         <div className="runtime-box">
-          <strong>{runtimeBlocked ? 'Fail-closed' : 'DeepSeek active'}</strong>
+          <strong>{runtimeBlocked ? 'Fail-closed' : 'LLM active'}</strong>
           <small>{runtimeNotice}</small>
         </div>
       </section>
